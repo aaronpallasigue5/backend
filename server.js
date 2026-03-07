@@ -5,39 +5,19 @@ import { db } from "./db.js";
 import moodRoutes from "./routes/moods.js";
 
 dotenv.config();
-
 const app = express();
 
-// Middlewares
-// Mas maigi na naka-specify ang origin para hindi harangin ng browser
+// Update 'origin' to your actual GitHub Pages URL to fix CORS errors
 app.use(cors({
-  origin: "https://lab-6-front-endd.onrender.com",
+  origin: "https://aaronpallasigue5.github.io",
   methods: ["GET", "POST"],
   credentials: true
 }));
 
 app.use(express.json());
+app.use("/mood", moodRoutes); // This matches api.post('/mood') in your UI
 
-// Routes
-// Ito ang kailangang mag-match sa api.js at MoodForm.vue
-app.use("/moods", moodRoutes);  
-
-// Test DB route
-app.get("/test-db", async (req, res) => {
-  try {
-    const [rows] = await db.query("SELECT 1");
-    res.json({ status: "DB Connected", rows });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// Root Route - Ito ang magpapatunay kung "Live" na ang backend
-app.get("/", (req, res) => {
-  res.send("Backend is running and connected!");
-});
+app.get("/", (req, res) => res.send("Backend is running!"));
 
 const PORT = process.env.PORT || 10000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+app.listen(PORT, () => console.log(`Server on port ${PORT}`));
