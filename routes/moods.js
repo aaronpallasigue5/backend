@@ -1,49 +1,43 @@
 import express from "express";
 import { db } from "../db.js";
-// 1. IMPORT: Siguraduhin na naka-import ang AI service sa taas
-import { getAIResponse } from "../services/aiService.js"; 
 
 const router = express.Router();
 
+// Helper function for AI logic (Internal to keep it simple)
+const getAIResponse = (text) => {
+  const mood = text.toLowerCase();
+  if (mood.includes("happy") || mood.includes("good")) return "That's wonderful! Keep shining! ✨";
+  if (mood.includes("sad") || mood.includes("bad")) return "I'm sorry you're feeling this way. Take it slow today. 🌿";
+  if (mood.includes("stress") || mood.includes("anxious")) return "Deep breaths. You've got this. 🧘‍♂️";
+  return "Thank you for sharing. I'm here to support you.";
+};
+
+// GET all moods
 router.get("/", async (req, res) => {
   try {
-    const [rows] = await db.query("SELECT * FROM mood_entries ORDER BY created_at DESC");
+    const [rows] = await db.query("SELECT * FROM name_moods ORDER BY id DESC");
     res.json(rows);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
+// POST a new mood
 router.post("/", async (req, res) => {
   const { full_name, mood_text } = req.body;
-  const manualId = Math.floor(Math.random() * 1000000); 
-
-  const now = new Date(new Date().getTime() + (8 * 60 * 60 * 1000))
-              .toISOString()
-              .slice(0, 19)
-              .replace('T', ' ');
 
   try {
-    // 2. DYNAMIC MESSAGE: Tawagin ang AI service base sa mood_text ng user
-    const aiMessage = await getAIResponse(mood_text);
+    const aiMessage = getAIResponse(mood_text);
 
-    // 3. DATABASE SAVING: Isama ang lahat sa tamang tables
-    await db.query("INSERT INTO users (id, full_name) VALUES (?, ?)", [manualId, full_name]);
-
-    await db.query(
-      "INSERT INTO mood_entries (id, user_name, mood_text, created_at) VALUES (?, ?, ?, ?)", 
-      [manualId, full_name, mood_text, now]
-    );
-
-    // Dito na papasok ang iba-ibang messages sa Railway table mo
-    await db.query(
-      "INSERT INTO ai_responses (id, mood_entry_id, ai_message) VALUES (?, ?, ?)", 
-      [manualId, manualId, aiMessage]
+    // FIXED: Now uses the exact table and column names from your Railway screenshot
+    const [result] = await db.query(
+      "INSERT INTO name_moods (user_name, message, ai_response) VALUES (?, ?, ?)",
+      [full_name, mood_text, aiMessage]
     );
 
     res.status(201).json({ 
       message: "Success!", 
-      ai_response: aiMessage 
+      ai_message: aiMessage // Matches your MoodForm.vue requirement
     });
   } catch (err) {
     console.error("SQL Error:", err.message);
