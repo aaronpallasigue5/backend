@@ -9,10 +9,9 @@ export const db = mysql.createPool({
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
-  // Siguraduhin na Number ang port at gamitin ang Public Port ng Railway
-  port: Number(process.env.DB_PORT) || 23648, 
+  port: Number(process.env.DB_PORT) || 23648, // Siguraduhing Number ito
   waitForConnections: true,
   connectionLimit: 10,
-  queueLimit: 0
+  queueLimit: 0,
+  connectTimeout: 10000 // Dagdag proteksyon sa timeout
 });
-
