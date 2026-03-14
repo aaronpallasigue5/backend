@@ -7,15 +7,22 @@ dotenv.config();
 const app = express();
 
 app.use(cors({
-  origin: "https://aaronpallasigue5.github.io", // Palitan kung iba ang GitHub URL mo
+  // Pinayagan ang main domain at ang sub-path ng repo mo
+  origin: [
+    "https://aaronpallasigue5.github.io",
+    "http://localhost:5173" 
+  ],
   methods: ["GET", "POST"],
   credentials: true
 }));
 
 app.use(express.json());
+
+// Main Routes
 app.use("/mood", moodRoutes);
 
-app.get("/", (req, res) => res.send("Backend is running on Render and connected to Railway!"));
+// Health Check
+app.get("/", (req, res) => res.send("Backend is running and connected to Railway!"));
 
 const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
