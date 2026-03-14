@@ -1,28 +1,40 @@
-export async function getAIResponse(text) {
-  try {
-    const userMood = text.toLowerCase();
+import axios from 'axios';
 
-    // Logic para sa mas maraming emosyon
-    if (userMood.includes("happy") || userMood.includes("good") || userMood.includes("great") || userMood.includes("excited")) {
-      return "That's wonderful! Your positive energy is contagious. Keep shining! ✨";
-    } 
-    else if (userMood.includes("sad") || userMood.includes("bad") || userMood.includes("tired") || userMood.includes("lonely")) {
-      return "I'm sorry you're feeling this way. Remember that it's okay to rest and take it slow today. 🌿";
-    } 
-    else if (userMood.includes("anxious") || userMood.includes("nervous") || userMood.includes("worried") || userMood.includes("stressed")) {
-      return "Take a deep breath. Focus on what you can control right now. You've got this. 🧘‍♂️";
-    } 
-    else if (userMood.includes("angry") || userMood.includes("mad") || userMood.includes("frustrated") || userMood.includes("annoyed")) {
-      return "It's okay to feel frustrated. Try to take a step back and let your mind cool down for a moment. 🌬️";
-    } 
-    else if (userMood.includes("grateful") || userMood.includes("blessed") || userMood.includes("thankful")) {
-      return "Gratitude is a powerful thing! It's lovely to see you appreciating the good things. 🙏";
-    } 
-    else {
-      // Default message kung hindi pasok sa mga keywords
-      return "Thank you for sharing your thoughts. I'm here to listen and support you. Remember to breathe and take things one step at a time.";
-    }
-  } catch (err) {
-    return "AI service unavailable. Please take care of yourself.";
+// PALITAN ITO: Ilagay ang iyong totoong Render URL
+const API_BASE_URL = "https://iyong-app-name.onrender.com"; 
+
+const api = axios.create({
+  baseURL: API_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json'
   }
-}
+});
+
+export const moodService = {
+  // Para mag-submit ng bagong mood
+  async submitMood(fullName, moodText) {
+    try {
+      const response = await api.post('/mood', {
+        full_name: fullName,
+        mood_text: moodText
+      });
+      return response.data; // Ito yung magbabalik ng { message, ai_message }
+    } catch (error) {
+      console.error("API Error (Post):", error);
+      throw error;
+    }
+  },
+
+  // Para makuha ang history (Part 4 ng Lab)
+  async getMoodHistory() {
+    try {
+      const response = await api.get('/mood');
+      return response.data;
+    } catch (error) {
+      console.error("API Error (Get):", error);
+      throw error;
+    }
+  }
+};
+
+export default moodService;
